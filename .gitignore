@@ -6,5 +6,6 @@
 *.pdf
 .ipynb**
 *.pyc
+*.mp4
 cpu
 gpu
