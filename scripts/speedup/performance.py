@@ -168,7 +168,7 @@ heatmap_norm = Normalize(vmin=2.5, vmax=25.0)
 # Heatmap data
 # ============================================================
 
-main_components = [
+component_priority = [
     "dynamics_wind_total",
     "microphysics",
     "dynamics_thermo",
@@ -180,6 +180,11 @@ main_components = [
     "area_mean_nudging",
     "dynamics_diagnostics",
 ]
+
+# Keep the first N components in the priority list; fold every other timer into
+# a single Others row.  Change this value to adjust the heatmap row count.
+n_components_to_show = 8
+main_components = component_priority[:n_components_to_show]
 
 shown_sum_s = wide[main_components].sum(axis=1)
 others_s = total_s - shown_sum_s
@@ -207,7 +212,7 @@ component_labels = {
     "dynamics_thermo": "Dynamics\nthermo_vars",
     "dynamics_vorticity": "Dynamics\nvorticity_vars",
     "radiation": "Radiation",
-    "halo_exchange": "Halo exchange",
+    "halo_exchange": "Halo exchange\n(excluding solver)",
     "turbulence": "Turbulence",
     "io": "Output",
     "area_mean_nudging": "Nudging",
@@ -267,35 +272,36 @@ line_runtime, = ax1.plot(
     label="Wall-clock time",
 )
 
-ax1.set_xlabel("Number of GPUs")
+ax1.set_xlabel("Number of GPUs (8 GPUs per node)", labelpad=-7)
 ax1.set_ylabel("Total runtime (h)", fontsize=9.0)
 ax1.yaxis.set_label_position("left")
 ax1.yaxis.tick_left()
 ax1_top.yaxis.tick_left()
 resource_ticks = np.concatenate(([cpu_x], gpus))
-resource_labels = ["", *[str(gpu) for gpu in gpus]]
+resource_labels = [
+    "1024\nCPUs",
+    "8",
+    "16",
+    "32",
+    "64",
+]
 ax1.set_xticks(resource_ticks)
-ax1.set_xticklabels(resource_labels)
-ax1.annotate(
-    f"{cpu_count}\nCPUs",
-    xy=(cpu_x, 0),
-    xycoords=ax1.get_xaxis_transform(),
-    xytext=(-5, -6.5),
-    textcoords="offset points",
-    ha="center",
-    va="top",
-    fontsize=mpl.rcParams["xtick.labelsize"],
-    annotation_clip=False,
-)
+resource_ticklabels = ax1.set_xticklabels(resource_labels)
+resource_ticklabels[0].set_ha("right")
+resource_ticklabels[0].set_multialignment("right")
+for ticklabel in resource_ticklabels[1:]:
+    ticklabel.set_ha("center")
+    ticklabel.set_multialignment("center")
 ax1.set_xlim(-2, 68)
-ax1_top.set_title("(a) Scaling performance", loc="left", pad=3)
+ax1_top.set_title("(a) Strong scaling", loc="left", pad=3)
 ax1_top.tick_params(axis="x", which="both", bottom=False, labelbottom=False)
 ax1_top.grid(True, color="0.88", linewidth=0.6)
 ax1.grid(True, color="0.88", linewidth=0.6)
 
 ax1_top.set_ylim(70.5, 72.5)
 ax1.set_ylim(0, 19.0)
-ax1.set_yticks(np.arange(0,19.1,2.5))
+#ax1.set_ylim(0, 22.0)
+ax1.set_yticks(np.arange(0,ax1.get_ylim()[1], 2.5))
 
 ax1_top.tick_params(
     axis="y",
@@ -363,7 +369,7 @@ line_speedup, = ax1b.plot(
     label="Measured speedup",
 )
 
-ax1b.plot(
+point_cpu_speedup, = ax1b.plot(
     cpu_x,
     cpu_speedup,
     marker="s",
@@ -411,7 +417,7 @@ line_ideal, = ax1b.plot(
 )
 
 ax1b.set_ylabel("Speedup (relative to 1024 CPUs)",
-        fontsize=9, color=speedup_color, fontweight='bold')
+        fontsize=9, color=speedup_color)
 #ax1b.set_ylim(0, ideal_speedup.max() * 1.12)
 ax1b.set_ylim(0, ax1.get_ylim()[1]*5/2.5)
 ticks = np.concatenate(([1], np.arange(5, 36, 5)))
@@ -461,10 +467,8 @@ for x, y in zip(gpus, speedup):
 
 # Legend inside the figure, with explicit symbols and line styles.
 legend = ax1_top.legend(
-    # [line_runtime, point_cpu_runtime, line_speedup, line_ideal],
-    # ["Wall-clock time", "1024 CPUs", "Measured speedup", "Ideal GPU scaling"],
-    [line_runtime, line_speedup, line_ideal],
-    ["Wall-clock time", "Measured speedup", "Ideal GPU scaling"],
+    [line_runtime, point_cpu_speedup, line_speedup, line_ideal],
+    ["Wall-clock time", "1024 CPUs (1×)", "Measured speedup", "Ideal GPU scaling"],
     loc="upper center",
     ncol=1,
     frameon=True,
@@ -534,14 +538,14 @@ for ax in [ax1_top, ax1, ax2]:
 #     bottom=0.175,
 # )
 
-fig.suptitle(
-    "VVMex performance for 500 m TaiwanVVM on NVIDIA H200\n"
-    r"($2048 \times 2048 \times 70$ grid, 1 d, $\Delta t = 1$ s; 8 GPUs per node)",
-    fontsize=10,
-    fontweight="normal",
-    y=0.975,
-    linespacing=1.15,
-)
+# fig.suptitle(
+#     "VVMex performance for 500 m TaiwanVVM on NVIDIA H200\n"
+#     r"($2048 \times 2048 \times 70$ grid, 1 d, $\Delta t = 1$ s; 8 GPUs per node)",
+#     fontsize=10,
+#     fontweight="normal",
+#     y=0.975,
+#     linespacing=1.15,
+# )
 
 fig.subplots_adjust(
     left=0.07,
