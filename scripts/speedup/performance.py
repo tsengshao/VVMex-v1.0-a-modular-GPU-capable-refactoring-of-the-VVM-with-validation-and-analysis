@@ -272,14 +272,14 @@ line_runtime, = ax1.plot(
     label="Wall-clock time",
 )
 
-ax1.set_xlabel("Number of GPUs (8 GPUs per node)", labelpad=-7)
+ax1.set_xlabel("Number of GPUs (8 GPUs per node)")
 ax1.set_ylabel("Total runtime (h)", fontsize=9.0)
 ax1.yaxis.set_label_position("left")
 ax1.yaxis.tick_left()
 ax1_top.yaxis.tick_left()
 resource_ticks = np.concatenate(([cpu_x], gpus))
 resource_labels = [
-    "1024\nCPUs",
+    "",
     "8",
     "16",
     "32",
@@ -287,11 +287,21 @@ resource_labels = [
 ]
 ax1.set_xticks(resource_ticks)
 resource_ticklabels = ax1.set_xticklabels(resource_labels)
-resource_ticklabels[0].set_ha("right")
-resource_ticklabels[0].set_multialignment("right")
-for ticklabel in resource_ticklabels[1:]:
+for ticklabel in resource_ticklabels[0:]:
     ticklabel.set_ha("center")
     ticklabel.set_multialignment("center")
+
+ax1.annotate(
+    "1024\nCPUs",
+    xy=(cpu_x, 0),
+    xycoords=ax1.get_xaxis_transform(),
+    xytext=(-5, -7),
+    textcoords="offset points",
+    ha="center",
+    va="top",
+    fontsize=mpl.rcParams["xtick.labelsize"],
+    annotation_clip=False,
+)
 ax1.set_xlim(-2, 68)
 ax1_top.set_title("(a) Strong scaling", loc="left", pad=3)
 ax1_top.tick_params(axis="x", which="both", bottom=False, labelbottom=False)
