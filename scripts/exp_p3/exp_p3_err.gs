@@ -19,7 +19,7 @@ nz=33
 'wei=dzt.3*rho.3'
 *'wei=1'
 
-'set lwid 75 3'
+'set lwid 75 2'
 
 ** -0.5 0.5 
 

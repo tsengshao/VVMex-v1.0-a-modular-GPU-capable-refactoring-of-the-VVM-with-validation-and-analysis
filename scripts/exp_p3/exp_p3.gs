@@ -3,7 +3,7 @@
 'c'
 
 model='VVMex'
-*model='VVM'
+model='VVM'
 '! mkdir -p ./fig'
 
 dx=500
@@ -26,7 +26,16 @@ tlab=subwrd(tlablist,it)
 'q dim'
 line=sublin(result, 5)
 idxt=subwrd(line,9)
+
+if (it <=2)
+'set x '256-32' '256+32
+'set xlabs -16|-8|0|8|16'
+else
 'set x 128 389'
+'set xlabs -64|-32|0|32|64'
+endif
+
+
 'set y 1'
 'set z 1 31'
 
@@ -36,7 +45,6 @@ idxt=subwrd(line,9)
 'set mpdraw off'
 'set xlopts 1 75 0.2'
 'set ylopts 1 75 0.2'
-'set xlabs -64|-32|0|32|64'
 *'set ylabs 0|2|4|6|8|10|12|14|16'
 
 if (model='VVMex')
@@ -72,6 +80,16 @@ endif
 *X Limits = 1.5 to 10.5
 *Y Limits = 2 to 8
 'xcbar 1.5 10.5 0.4 0.7 -fw 0.15 -fh 0.15 -ft 10'
+
+'off'
+'set gxout contour'
+'set cthick 75'
+* 'set cint 0.05'
+* 'set black -0.000001 0.000001'
+'set ccolor 1'
+'set clevs 0.05 0.1'
+'d (qc_after_p3 - dm03.2)*1e3'
+
 
 ** 'set lwid 78 15'
 ** 'set gxout contour'
