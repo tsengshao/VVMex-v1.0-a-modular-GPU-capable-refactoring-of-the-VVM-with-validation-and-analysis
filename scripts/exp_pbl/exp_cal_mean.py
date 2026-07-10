@@ -24,6 +24,10 @@ MODELS = ("VVM", "VVMex")
 PROFILE_VARS = ("thbar", "qvbar", "qcbar", "qibar", "qrbar")
 SURFACE_VARS = ("tg", "ta", "sw", "lw", "lh", "sh", "gfx", "ws")
 VVM_NC_KIND = Literal["Thermodynamic", "Dynamic", "Surface", "Radiation", "LandSurface"]
+VVM_BAR_VAR_COUNT = 13
+VVM_LEVEL_COUNT = 150
+P0 = 100000.0
+RD_OVER_CP = 0.286
 
 
 @dataclass(frozen=True)
@@ -39,7 +43,7 @@ class ModelTask:
     model: Literal["VVM", "VVMex"]
     step: int
     paths: dict[str, Path]
-    rhobar0: float
+    pibar0: float
 
 
 @dataclass(frozen=True)
@@ -134,7 +138,19 @@ def build_task_paths(paths: CasePaths, step: int, model: str) -> dict[str, Path]
     raise ValueError(f"Unknown model: {model}")
 
 
-def read_static_grid(paths: CasePaths, first_step: int) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+def read_vvm_pibar(paths: CasePaths) -> np.ndarray:
+    bar_path = paths.vvm_case / "bar.dat"
+    values = np.fromfile(bar_path, dtype=np.float32)
+    expected_size = VVM_BAR_VAR_COUNT * VVM_LEVEL_COUNT
+    if values.size != expected_size:
+        raise ValueError(f"{bar_path} has {values.size} values; expected {expected_size}")
+    pbar = values.reshape(VVM_BAR_VAR_COUNT, VVM_LEVEL_COUNT)[0].astype(np.float64)
+    if not np.all(np.isfinite(pbar)) or np.any(pbar <= 0.0):
+        raise ValueError(f"Invalid pbar values in {bar_path}")
+    return np.power(pbar / P0, RD_OVER_CP)
+
+
+def read_static_grid(paths: CasePaths, first_step: int) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
     thermo = paths.vvm_case / "archive" / f"{paths.vvm_case.name}.L.Thermodynamic-{first_step:06d}.nc"
     h5_path = paths.vvmex_case / f"vvm_output_{first_step:06d}.h5"
     with xr.open_dataset(thermo, decode_times=False) as ds:
@@ -142,6 +158,8 @@ def read_static_grid(paths: CasePaths, first_step: int) -> tuple[np.ndarray, np.
     with h5py.File(h5_path, "r") as handle:
         z_vvmex = np.asarray(handle["Step0/coordinates/z_mid"][:], dtype=np.float64)
         rhobar = np.asarray(handle["Step0/rhobar"][:], dtype=np.float64)
+        pibar_vvmex = np.asarray(handle["Step0/pibar"][:], dtype=np.float64)
+    pibar = read_vvm_pibar(paths)
 
     if z_vvm.ndim != 1 or z_vvm.size != z_vvmex.size + 1:
         raise ValueError(f"Unexpected z size for {paths.land}: VVM={z_vvm.shape}, VVMex={z_vvmex.shape}")
@@ -151,8 +169,17 @@ def read_static_grid(paths: CasePaths, first_step: int) -> tuple[np.ndarray, np.
         raise ValueError(f"rhobar shape {rhobar.shape} does not match z {z_vvmex.shape}")
     if not np.all(np.isfinite(rhobar)) or np.any(rhobar <= 0.0):
         raise ValueError(f"Invalid rhobar values for {paths.land}")
+    if pibar.shape != z_vvm.shape:
+        raise ValueError(f"pibar shape {pibar.shape} does not match VVM z {z_vvm.shape}")
+    pibar = pibar[1:]
+    if not np.all(np.isfinite(pibar)) or np.any(pibar <= 0.0):
+        raise ValueError(f"Invalid pibar values for {paths.land}")
+    if pibar_vvmex.shape != z_vvmex.shape:
+        raise ValueError(f"VVMex pibar shape {pibar_vvmex.shape} does not match z {z_vvmex.shape}")
+    if not np.isclose(pibar[0], pibar_vvmex[0], rtol=1.0e-5, atol=1.0e-8):
+        raise ValueError(f"VVM pbar-derived first-level pibar does not match VVMex pibar for {paths.land}")
     dz = np.full_like(z_vvmex, 200.0, dtype=np.float64)
-    return z_vvmex, dz, rhobar
+    return z_vvmex, dz, rhobar, pibar
 
 
 def require_shape(name: str, array: np.ndarray, expected: tuple[int, ...]) -> None:
@@ -186,7 +213,7 @@ def read_vvm_task(task: ModelTask) -> StepMean:
             field = np.asarray(ds[source_name][0, 1:, :, :], dtype=np.float64)
             profiles[out_name] = profile_mean(field, source_name, nz)
         th_sfc = np.asarray(ds["th"][0, 1, :, :], dtype=np.float64)
-        surface["ta"] = mean_xy(th_sfc) * task.rhobar0
+        surface["ta"] = mean_xy(th_sfc * task.pibar0)
 
     with xr.open_dataset(task.paths["surface"], decode_times=False) as ds:
         surface["tg"] = mean_xy(np.asarray(ds["tg"][0, :, :], dtype=np.float64))
@@ -225,7 +252,7 @@ def read_vvmex_task(task: ModelTask) -> StepMean:
             field = np.asarray(group[source_name][:], dtype=np.float64)
             profiles[out_name] = profile_mean(field, source_name, nz)
         surface["tg"] = mean_xy(np.asarray(group["Tg"][:], dtype=np.float64))
-        surface["ta"] = mean_xy(np.asarray(group["th"][0, :, :], dtype=np.float64)) * task.rhobar0
+        surface["ta"] = mean_xy(np.asarray(group["th"][0, :, :], dtype=np.float64) * task.pibar0)
         surface["sw"] = mean_xy(np.asarray(group["swdn_sfc"][:], dtype=np.float64))
         surface["lw"] = mean_xy(np.asarray(group["lwdn_sfc"][:], dtype=np.float64))
         surface["lh"] = mean_xy(np.asarray(group["le"][:], dtype=np.float64)) * 2.5e6
@@ -315,7 +342,7 @@ def build_model_dataset(
             "horizontal_mean": "Mean over all 128 x 128 x-y grid cells.",
             "vertical_alignment": "VVM z=2..150 corresponds to VVMex z=1..149. Output coordinate lev is the common height.",
             "dz_definition": "Constant 200 m, matching GrADS lev(z=2)-lev(z=1) on the common VVMex grid.",
-            "ta_definition": "Horizontal-mean first common theta level multiplied by VVMex rhobar(z=1).",
+            "ta_definition": "Horizontal mean of first common theta level multiplied by pibar, where pibar=(pbar/100000)^0.286 from VVM bar.dat.",
         },
     )
     add_attrs(ds)
@@ -362,7 +389,7 @@ def add_attrs(ds: xr.Dataset) -> None:
     }.items():
         ds[name].attrs.update(long_name=long_name, units="kg kg-1")
     ds["tg"].attrs.update(long_name="horizontal-mean ground or skin temperature", units="K")
-    ds["ta"].attrs.update(long_name="horizontal-mean density-weighted first-level theta", units="kg K m-3")
+    ds["ta"].attrs.update(long_name="horizontal-mean near-surface air temperature", units="K")
     ds["sw"].attrs.update(long_name="horizontal-mean downward shortwave radiation at surface", units="W m-2")
     ds["lw"].attrs.update(long_name="horizontal-mean downward longwave radiation at surface", units="W m-2")
     ds["lh"].attrs.update(long_name="horizontal-mean latent heat flux diagnostic", units="W m-2", applied_factor=2.5e6)
@@ -441,20 +468,20 @@ def build_l2_dataset(land: str, vvm: xr.Dataset, vvmex: xr.Dataset) -> xr.Datase
 
 def process_land(paths: CasePaths, output_dir: Path, workers: int, max_steps: int | None, skip_l2: bool) -> None:
     steps = common_steps(paths, max_steps)
-    z, dz, rhobar = read_static_grid(paths, steps[0])
+    z, dz, rhobar, pibar = read_static_grid(paths, steps[0])
     print(f"{paths.land}: {len(steps)} common steps ({steps[0]:06d}-{steps[-1]:06d})", flush=True)
 
     datasets: dict[str, xr.Dataset] = {}
     for model in MODELS:
         tasks = [
-            ModelTask(paths.land, model, step, build_task_paths(paths, step, model), float(rhobar[0]))
+            ModelTask(paths.land, model, step, build_task_paths(paths, step, model), float(pibar[0]))
             for step in steps
         ]
         results = sorted(collect_means(tasks, workers), key=lambda item: item.step)
         source_case = paths.vvm_case if model.lower() == "vvm" else paths.vvmex_case
         ds = build_model_dataset(paths.land, model, results, steps, z, dz, rhobar, source_case)
         write_dataset(ds, output_dir / f"{paths.land}_{model}.nc")
-        datasets[model] = ds
+        datasets[model.lower()] = ds
 
     if not skip_l2:
         l2 = build_l2_dataset(paths.land, datasets["vvm"], datasets["vvmex"])

@@ -6,10 +6,10 @@
 
 explab='grass'
 explab='urban'
-explab='evergreen'
+* explab='evergreen'
 
 model='VVM'
-model='VVMex'
+*model='VVMex'
 
 nt=571
 
@@ -37,12 +37,14 @@ say model' 'explab
 'set ccolor 1'
 'd tg'
 
+'off'
 'set cmark 0'
 'set cthick 10'
 'set cstyle 4'
 'set ccolor 1'
 'd ta'
 'draw title TG, Ta(dash) [K]'
+'on'
 
 *fig sw
 'mul 3 2 2 2  -xwid 2.5 -ywid 1.5 -xint 1 -yint 1.0'
@@ -81,6 +83,8 @@ say model' 'explab
 'set ccolor 1'
 'set cstyle 1'
 'd sh'
+
+'off'
 'set cmark 0'
 'set cthick 10'
 'set ccolor 1'
@@ -110,6 +114,6 @@ say model' 'explab
 'set cstyle 1'
 'set ccolor 1'
 'd ws'
-'draw title WS [m/s]'
+'draw title WS [ms`a-1`n]'
 
 'gxprint ./fig/tg_'model'_'explab'.pdf'
