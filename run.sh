@@ -121,9 +121,9 @@ cd ${SRCDIR}
 cd "${SCRIPTDIR}/exp_2dbubble"
 opengrads -blcx exp_2dbubble.gs
 opengrads -a 2.6666667 -blcx exp_err_2dbubble.gs
-cp ./fig_VVMex/bubble2d_VVMex_000001.png ${OUTDIR}/fB01a.png
-cp ./fig_VVMex/bubble2d_VVMex_000011.png ${OUTDIR}/fB01b.png
-cp ./fig_VVMex/bubble2d_VVMex_000021.png ${OUTDIR}/fB01c.png
+python ${PYROTATE} ./pdf_VVMex/bubble2d_VVMex_000001.pdf ${OUTDIR}/fB01a.pdf
+python ${PYROTATE} ./pdf_VVMex/bubble2d_VVMex_000011.pdf ${OUTDIR}/fB01b.pdf
+python ${PYROTATE} ./pdf_VVMex/bubble2d_VVMex_000021.pdf ${OUTDIR}/fB01c.pdf
 python ${PYROTATE} ./error_bubble2d.pdf ${OUTDIR}/fB01d.pdf
 cd $SRCDIR
 
