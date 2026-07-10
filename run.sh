@@ -3,16 +3,50 @@ set -euo pipefail
 
 SRCDIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 SCRIPTDIR="${SRCDIR}/scripts"
-export GASCRP="$GASCRP:${SCRIPTDIR}/GRADSLIB/"
+export GASCRP="${GASCRP:+${GASCRP}:}${SCRIPTDIR}/GRADSLIB/"
 #python="~/miniforge3/envs/py311/bin/python"
 #export PATH="$(dirname ${python}):$PATH"
 
-for command in python opengrads; do
-    if ! command -v "${command}" >/dev/null 2>&1; then
-        echo "Error: '${command}' was not found in PATH. Please install it and try again." >&2
-        exit 1
-    fi
-done
+if ! command -v python >/dev/null 2>&1; then
+    cat >&2 <<'EOF'
+Error: 'python' was not found in PATH.
+
+Create and activate the environment described in environment.yml, then run this
+script again:
+  mamba env create -f environment.yml
+  conda activate vvm-vvmex-analysis
+
+Alternatively, replace 'mamba' with 'conda' in the first command.
+See README.md for the full setup instructions.
+EOF
+    exit 1
+fi
+
+if ! python -c 'import h5py, matplotlib, netCDF4, numpy, pandas, pypdf, vvmtools, xarray' >/dev/null 2>&1; then
+    cat >&2 <<'EOF'
+Error: Python is available, but required analysis packages are missing.
+
+Create or update and activate the project environment:
+  mamba env create -f environment.yml
+  conda activate vvm-vvmex-analysis
+
+For an existing environment, run:
+  mamba env update -f environment.yml
+See README.md for Conda alternatives.
+EOF
+    exit 1
+fi
+
+if ! command -v opengrads >/dev/null 2>&1; then
+    cat >&2 <<'EOF'
+Error: 'opengrads' was not found in PATH.
+
+Install OpenGrADS and ensure its executable is named 'opengrads' and available
+on PATH, then run this script again. OpenGrADS is installed separately from
+environment.yml; see README.md for the prerequisite details.
+EOF
+    exit 1
+fi
 
 # Write generated figures to the repository root.
 OUTDIR="${SRCDIR}/OUTPUT_FIGURES"
