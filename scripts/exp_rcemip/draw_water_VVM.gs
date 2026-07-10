@@ -13,7 +13,7 @@ if (tend = '')
 endif
 
 model='VVM'
-dir='../../cpu/case_rce_f1_aaron_rad/gs_ctl_files/'
+dir='../../VVM/case_rce_f1_aaron_rad/gs_ctl_files/'
 
 outPath='./figs_cwv_'model'/'
 say outPath

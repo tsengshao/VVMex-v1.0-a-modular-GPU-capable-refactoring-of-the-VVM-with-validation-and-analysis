@@ -4,14 +4,16 @@
 'set background 1'
 'c'
 
-explab='grass'
-explab='urban'
-* explab='evergreen'
-
-model='VVM'
-*model='VVMex'
-
 nt=571
+
+explist='grass urban evergreen'
+modellist='VVM VVMex'
+iexp=1
+while(iexp<=3)
+explab=subwrd(explist, iexp)
+imo=1
+while(imo<=2)
+model=subwrd(modellist, imo)
 
 say model' 'explab
 
@@ -117,3 +119,10 @@ say model' 'explab
 'draw title WS [ms`a-1`n]'
 
 'gxprint ./fig/tg_'model'_'explab'.pdf'
+
+'close 1'
+
+imo=imo+1
+endwhile
+iexp=iexp+1
+endwhile

@@ -10,9 +10,9 @@ dx=500
 nx=512
 ny=16
 nz=33
-'open ../../gpu/bubble_shear_wk/vvm.ctl'
-'open ../../cpu/bubble_shear_wk_offline/gs_ctl_files/diag.ctl'
-'open ../../cpu/bubble_shear_wk_offline/gs_ctl_files/bar.ctl'
+'open ../../VVMex/bubble_shear_wk/vvm.ctl'
+'open ../../VVM/bubble_shear_wk_offline/gs_ctl_files/diag.ctl'
+'open ../../VVM/bubble_shear_wk_offline/gs_ctl_files/bar.ctl'
 
 *'set lwid 75 8'
 'set lwid 75 3'
@@ -115,7 +115,7 @@ itt=math_format( '%06.0f', idxt-1)
 'gxprint ./fig/'model'_'itt'.pdf'
 
 
-pull c
+*pull c
 
 
 'c'
@@ -156,7 +156,7 @@ itt=math_format( '%06.0f', idxt-1)
 'gxprint ./fig/DIFF_'itt'.pdf'
 
 
-pull c
+*pull c
 
 it=it+1
 endwhile

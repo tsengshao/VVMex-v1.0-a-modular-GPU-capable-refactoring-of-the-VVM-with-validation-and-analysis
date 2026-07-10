@@ -4,10 +4,10 @@
 
 model='VVM'
 exp='taiwanvvm'
-dir='../../cpu/case_taiwanvvm_f1_aaron/gs_ctl_files/'
+dir='../../VVM/case_taiwanvvm_f1_aaron/gs_ctl_files/'
 
 exp='taiwanvvmlarge'
-dir='../../cpu/case_taiwanvvm_f1_Large_aaron/gs_ctl_files/'
+dir='../../VVM/case_taiwanvvm_f1_Large_aaron/gs_ctl_files/'
 
 figdir='./fig/'exp'/'
 '! mkdir -p 'figdir'/'model

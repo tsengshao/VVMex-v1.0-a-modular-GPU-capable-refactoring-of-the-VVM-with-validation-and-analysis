@@ -105,11 +105,11 @@ print(f"[Figure style] Using font family: {selected_font}")
 # ============================================================
 
 def gpu_dir(exp):
-    return os.path.join(base_dir, 'gpu', exp)
+    return os.path.join(base_dir, 'VVMex', exp)
 
 
 def vvm_dir(exp):
-    return os.path.join(base_dir, 'cpu', exp, 'archive')
+    return os.path.join(base_dir, 'VVM', exp, 'archive')
 
 
 def gpu_file(exp, step):
@@ -544,4 +544,4 @@ for path in [output_png, output_pdf]:
         size_mb = os.path.getsize(path) / 1024.0 / 1024.0
         print(f"[File size] {path}: {size_mb:.3f} MB")
 
-plt.show()
+#plt.show()

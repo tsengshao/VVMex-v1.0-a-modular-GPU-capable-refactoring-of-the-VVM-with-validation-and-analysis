@@ -18,12 +18,12 @@ nt=721
 
 say model' 'explab
 
-'open ../../gpu/'expex'/vvm.ctl'
-'open ../../cpu/'exp0'/gs_ctl_files/dynamic.ctl'
-'open ../../cpu/'exp0'/gs_ctl_files/thermodynamic.ctl'
-'open ../../cpu/'exp0'/gs_ctl_files/surface.ctl'
-'open ../../cpu/'exp0'/gs_ctl_files/radiation.ctl'
-'open ../../cpu/'exp0'/gs_ctl_files/landsurface.ctl'
+'open ../../VVMex/'expex'/vvm.ctl'
+'open ../../VVM/'exp0'/gs_ctl_files/dynamic.ctl'
+'open ../../VVM/'exp0'/gs_ctl_files/thermodynamic.ctl'
+'open ../../VVM/'exp0'/gs_ctl_files/surface.ctl'
+'open ../../VVM/'exp0'/gs_ctl_files/radiation.ctl'
+'open ../../VVM/'exp0'/gs_ctl_files/landsurface.ctl'
 
 'set x 1'
 'set y 1'

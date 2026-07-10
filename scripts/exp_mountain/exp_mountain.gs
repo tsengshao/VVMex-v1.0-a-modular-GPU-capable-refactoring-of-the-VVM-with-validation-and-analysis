@@ -2,9 +2,9 @@
 'set background 1'
 'c'
 
-'open ../../gpu/mountain_noturb/vvm.ctl'
-'open ../../cpu/mountain_aaron_new_noturb/gs_ctl_files/dynamic.ctl'
-'open ../../cpu/mountain_aaron_new_noturb/gs_ctl_files/bar.ctl'
+'open ../../VVMex/mountain_noturb/vvm.ctl'
+'open ../../VVM/mountain_aaron_new_noturb/gs_ctl_files/dynamic.ctl'
+'open ../../VVM/mountain_aaron_new_noturb/gs_ctl_files/bar.ctl'
 nz=74
 
 'set x 1'
@@ -32,7 +32,7 @@ nz=74
 
 
 
-pull c
+*pull c
 'c'
 'set z 1 51'
 'set x 206 306'
@@ -108,7 +108,7 @@ errnum=subwrd(result,4)
 *'gxprint mountain_VVMex.png white x3000 y2400'
 'gxprint mountain_VVMex.pdf'
 
-pull c
+*pull c
 'c'
 'set parea 1.5 10.5 1 7'
 'set grads off'

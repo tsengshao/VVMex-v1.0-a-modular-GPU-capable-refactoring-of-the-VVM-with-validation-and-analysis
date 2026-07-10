@@ -13,7 +13,7 @@ if (tend = '')
 endif
 
 model='VVMex'
-dir='../../gpu/rcemip_0623'
+dir='../../VVMex/rcemip_0623'
 
 outPath='./figs_cwv_'model'/'
 say outPath

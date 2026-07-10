@@ -4,7 +4,7 @@
 'c'
 
 title='Weakly forced RCEMIP case'
-'open ../../gpu/rcemip_0623/vvm.ctl'
+'open ../../VVMex/rcemip_0623/vvm.ctl'
 'q file 1'
 line=sublin(result, 5)
 nz=subwrd(line,9)

@@ -5,23 +5,28 @@
 'set background 1'
 'c'
 
-explab='grass'
-explab='urban'
-explab='evergreen'
+explist='grass urban evergreen'
+modellist='VVM VVMex'
 
-model='VVM'
-model='VVMex'
+iexp=1
+while(iexp<=3)
+explab=subwrd(explist, iexp)
 
-nt=721
+'sdfopen ./data/'explab'_VVMex.nc'
+'sdfopen ./data/'explab'_VVM.nc'
+'sdfopen ./data/'explab'_l2.nc'
+
+imo=1
+while(imo<=2)
+model=subwrd(modellist, imo)
+
+*nt=721
 nt=571
 iz0=1
 iz1=16
 inthr=3
 say model' 'explab
 
-'sdfopen ./data/'explab'_VVMex.nc'
-'sdfopen ./data/'explab'_VVM.nc'
-'sdfopen ./data/'explab'_l2.nc'
 
 **** --- fig error
 'c'
@@ -36,7 +41,6 @@ say model' 'explab
 'd thbar_l2.3'
 'draw title relative L2_norm (theta_bar)'
 'gxprint ./fig/ERROR_thbar_'explab'.pdf'
-pull c
 
 **** --- fig 2 --
 'c'
@@ -152,3 +156,13 @@ endif
 'draw ylab [m]'
 
 'gxprint ./fig/tg2_'model'_'explab'.pdf'
+
+imo=imo+1
+endwhile
+
+'close 3'
+'close 2'
+'close 1'
+
+iexp=iexp+1
+endwhile

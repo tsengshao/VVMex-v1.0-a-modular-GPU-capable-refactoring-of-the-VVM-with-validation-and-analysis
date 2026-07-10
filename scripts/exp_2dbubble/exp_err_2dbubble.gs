@@ -5,9 +5,9 @@
 'c'
 
 *../../gpu/testing_output_2dbubble/
-'open ../../gpu/testing_output_2dbubble/vvm.ctl'
-'open ../../cpu/2dbubble_0703/gs_ctl_files/dynamic.ctl'
-'open ../../cpu/2dbubble_0703/gs_ctl_files/thermodynamic.ctl'
+'open ../../VVMex/testing_output_2dbubble/vvm.ctl'
+'open ../../VVM/2dbubble_0703/gs_ctl_files/dynamic.ctl'
+'open ../../VVM/2dbubble_0703/gs_ctl_files/thermodynamic.ctl'
 nz=33
 
 'set x 1'

@@ -4,7 +4,7 @@
 'c'
 
 title='Heterogeneous diurnal circulation'
-'open ../../gpu/sea_urban_mountain_good_luck_2/vvm.ctl'
+'open ../../VVMex/sea_urban_mountain_good_luck_2/vvm.ctl'
 'q file 1'
 line=sublin(result, 5)
 nz=subwrd(line,9)

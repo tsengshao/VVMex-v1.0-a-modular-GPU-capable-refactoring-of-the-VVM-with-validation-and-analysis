@@ -13,7 +13,7 @@ expex='taiwanvvm_20120819_2048'
 figdir='./fig/'exp'/'
 '! mkdir -p 'figdir'/'model
 
-'open ../../gpu/'expex'/vvm.ctl'
+'open ../../VVMex/'expex'/vvm.ctl'
 
 'q file'
 line=sublin(result,5)

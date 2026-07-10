@@ -22,12 +22,12 @@ SCRIPT_DIR = Path(__file__).resolve().parent
 DEFAULT_CASE = "grass"
 DEFAULT_CASE_PATHS = {
     "grass": {
-        "cpu": SCRIPT_DIR / "../../cpu/nb_g_eb_300m_aaron_new",
-        "gpu": SCRIPT_DIR / "../../gpu/sea_grass_mountain_good_luck",
+        "cpu": SCRIPT_DIR / "../../VVM/nb_g_eb_300m_aaron_new",
+        "gpu": SCRIPT_DIR / "../../VVMex/sea_grass_mountain_good_luck",
     },
     "urban": {
-        "cpu": SCRIPT_DIR / "../../cpu/nb_u_eb_300m_aaron",
-        "gpu": SCRIPT_DIR / "../../gpu/sea_urban_mountain_good_luck_2",
+        "cpu": SCRIPT_DIR / "../../VVM/nb_u_eb_300m_aaron",
+        "gpu": SCRIPT_DIR / "../../VVMex/sea_urban_mountain_good_luck_2",
     },
 }
 DEFAULT_CACHE_DIR = SCRIPT_DIR / "nc"
@@ -348,7 +348,7 @@ def draw_land_region_axis(panel: mpl.axes.Axes, case: str) -> None:
             label,
             ha="center",
             va="center",
-            fontsize=18,
+            fontsize=22,
             linespacing=1.1,
         )
 
@@ -539,7 +539,7 @@ def main() -> None:
             "(c) Relative L$_2$ norm",
             DIFFERENCE_CLEVS,
             difference_cmap,
-            "abs(VVMex-VVM)/abs(VVM)",
+            "Relative L$_2$ norm",
             "max",
         ),
     )

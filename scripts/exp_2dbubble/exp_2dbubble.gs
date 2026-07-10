@@ -2,11 +2,17 @@
 'set background 1'
 'c'
 
-'open ../../gpu/testing_output_2dbubble/vvm.ctl'
-'open ../../cpu/2dbubble_0703/gs_ctl_files/thermodynamic.ctl'
+'open ../../VVMex/testing_output_2dbubble/vvm.ctl'
+'open ../../VVM/2dbubble_0703/gs_ctl_files/thermodynamic.ctl'
 
 model='VVMex'
 *model='VVM'
+
+modellist = 'VVMex VVM'
+imodel=1
+while(imodel<=2)
+model=subwrd(modellist,imodel)
+
 '! mkdir -p ./fig_'model
 '! mkdir -p ./pdf_'model
 
@@ -60,5 +66,8 @@ itt=math_format( '%06.0f', t)
 
 *pull c
 t=t+1
+endwhile
+
+imodel = imodel+1
 endwhile
 

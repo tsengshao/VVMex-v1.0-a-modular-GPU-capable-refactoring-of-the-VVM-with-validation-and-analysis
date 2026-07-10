@@ -4,16 +4,9 @@
 'c'
 
 explab='grass'
-*explab='urban'
-*explab='evergreen'
-
-exp0='pbl_'explab'_aaron_dz200'
 expex=explab'_good_luck'
 
-model='VVM'
-*model='VVMex'
-
-'open ../../gpu/'expex'/vvm.ctl'
+'open ../../VVMex/'expex'/vvm.ctl'
 nz=99
 
 'set x 1'
