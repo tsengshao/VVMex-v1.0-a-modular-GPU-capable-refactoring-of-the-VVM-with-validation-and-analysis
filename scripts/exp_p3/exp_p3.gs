@@ -3,7 +3,7 @@
 'c'
 
 model='VVMex'
-model='VVM'
+*model='VVM'
 '! mkdir -p ./fig'
 
 dx=500

@@ -227,13 +227,31 @@ def comparison_to_dataset(
     )
 
 
-def dataset_to_comparison(dataset: xr.Dataset) -> dict[str, np.ndarray]:
-    required = ("cpu_ymean", "gpu_ymean", "relative_error_ymean")
-    missing = [name for name in required if name not in dataset]
-    if missing:
-        raise KeyError(f"Cache file is missing variables: {', '.join(missing)}")
+def dataset_to_comparison(
+    dataset: xr.Dataset, variable: str
+) -> tuple[dict[str, np.ndarray], np.ndarray]:
+    """Validate a cache file and return its plot-ready comparison and x coordinate."""
+    required_data_vars = ("cpu_ymean", "gpu_ymean", "relative_error_ymean")
+    missing_data_vars = [name for name in required_data_vars if name not in dataset.data_vars]
+    if missing_data_vars:
+        raise KeyError(
+            "Cache file is missing data variables: "
+            f"{', '.join(missing_data_vars)}"
+        )
 
-    return {
+    required_coords = ("x", "step", "time_minutes")
+    missing_coords = [name for name in required_coords if name not in dataset.coords]
+    if missing_coords:
+        raise KeyError(f"Cache file is missing coordinates: {', '.join(missing_coords)}")
+
+    cached_variable = dataset.attrs.get("variable")
+    if cached_variable != variable:
+        raise ValueError(
+            f"Cache variable mismatch: cache has {cached_variable!r}, "
+            f"but --variable is {variable!r}"
+        )
+
+    comparison = {
         "steps": np.asarray(dataset["step"].values, dtype=np.int64),
         "time_minutes": np.asarray(dataset["time_minutes"].values, dtype=np.float64),
         "cpu_ymean": np.asarray(dataset["cpu_ymean"].values, dtype=np.float64),
@@ -242,35 +260,39 @@ def dataset_to_comparison(dataset: xr.Dataset) -> dict[str, np.ndarray]:
             dataset["relative_error_ymean"].values, dtype=np.float64
         ),
     }
+    return comparison, np.asarray(dataset["x"].values, dtype=np.float64)
 
 
-def load_or_collect_comparison(
+def load_cached_comparison(
+    cache_path: Path, variable: str
+) -> tuple[dict[str, np.ndarray], np.ndarray]:
+    """Load a validated cache without accessing VVM or VVMex outputs."""
+    print(f"Reading cached comparison: {cache_path}")
+    with xr.open_dataset(cache_path, decode_times=False) as dataset:
+        return dataset_to_comparison(dataset, variable)
+
+
+def write_comparison_cache(
     cache_path: Path,
-    cpu: CPUReader,
-    gpu: GPUReader,
+    comparison: dict[str, np.ndarray],
+    x_m: np.ndarray,
     variable: str,
-    steps: list[int],
+    vvm_case: Path,
+    vvmex_case: Path,
     max_times: int | None,
-) -> dict[str, np.ndarray]:
-    if cache_path.exists():
-        print(f"Reading cached comparison: {cache_path}")
-        with xr.open_dataset(cache_path, decode_times=False) as dataset:
-            return dataset_to_comparison(dataset)
-
-    print(f"Cache not found; computing comparison: {cache_path}")
-    comparison = collect_comparison(cpu, gpu, variable, steps)
+) -> None:
+    """Write a newly computed comparison cache."""
     dataset = comparison_to_dataset(
         comparison,
-        cpu.x,
+        x_m,
         variable,
-        cpu.case_path,
-        gpu.case_path,
+        vvm_case,
+        vvmex_case,
         max_times,
     )
     cache_path.parent.mkdir(parents=True, exist_ok=True)
     dataset.to_netcdf(cache_path)
     print(f"Wrote {cache_path}")
-    return comparison
 
 
 def set_plot_defaults() -> None:
@@ -464,7 +486,10 @@ def parse_args() -> argparse.Namespace:
         "--cache-file",
         type=Path,
         default=None,
-        help="Use an explicit NetCDF cache file instead of ./nc/sea_{case}_mountain.nc.",
+        help=(
+            "Use an explicit NetCDF cache file instead of "
+            "DATA/exp_sea_land_mountain/sea_{case}_mountain.nc."
+        ),
     )
     parser.add_argument("--variable", default="u")
     parser.add_argument(
@@ -478,38 +503,47 @@ def parse_args() -> argparse.Namespace:
 
 def main() -> None:
     args = parse_args()
-    cpu_case, gpu_case = resolve_case_paths(args)
     label = args.case
-    if args.cpu_case is not None or args.gpu_case is not None:
-        label = case_label(cpu_case, gpu_case)
     cache_path = cache_path_for_args(args, label)
     output_dir = output_dir_for_args(args)
     output_dir.mkdir(parents=True, exist_ok=True)
 
     print(f"Case: {label}")
-    print(f"VVM case: {cpu_case.resolve()}")
-    print(f"VVMex case: {gpu_case.resolve()}")
-    cpu = CPUReader(cpu_case)
-    gpu = GPUReader(gpu_case)
+    if cache_path.exists():
+        comparison, x_m = load_cached_comparison(cache_path, args.variable)
+    else:
+        cpu_case, gpu_case = resolve_case_paths(args)
+        if args.cpu_case is not None or args.gpu_case is not None:
+            label = case_label(cpu_case, gpu_case)
+        print(f"Cache not found; computing comparison: {cache_path}")
+        print(f"VVM case: {cpu_case.resolve()}")
+        print(f"VVMex case: {gpu_case.resolve()}")
+        cpu = CPUReader(cpu_case)
+        gpu = GPUReader(gpu_case)
 
-    if cpu.x.shape != gpu.x.shape or cpu.y.shape != gpu.y.shape:
-        raise ValueError(
-            f"Horizontal grid shape mismatch: VVM {(cpu.y.size, cpu.x.size)}, "
-            f"VVMex {(gpu.y.size, gpu.x.size)}"
+        if cpu.x.shape != gpu.x.shape or cpu.y.shape != gpu.y.shape:
+            raise ValueError(
+                f"Horizontal grid shape mismatch: VVM {(cpu.y.size, cpu.x.size)}, "
+                f"VVMex {(gpu.y.size, gpu.x.size)}"
+            )
+        if not np.allclose(cpu.z, gpu.z):
+            raise ValueError(
+                "VVM levels after dropping level zero do not match VVMex z_mid"
+            )
+
+        steps = common_steps(cpu, gpu, args.max_times)
+        print(f"Common time steps selected: {len(steps)}")
+        comparison = collect_comparison(cpu, gpu, args.variable, steps)
+        x_m = cpu.x
+        write_comparison_cache(
+            cache_path,
+            comparison,
+            x_m,
+            args.variable,
+            cpu.case_path,
+            gpu.case_path,
+            args.max_times,
         )
-    if not np.allclose(cpu.z, gpu.z):
-        raise ValueError("VVM levels after dropping level zero do not match VVMex z_mid")
-
-    steps = common_steps(cpu, gpu, args.max_times)
-    print(f"Common time steps selected: {len(steps)}")
-    comparison = load_or_collect_comparison(
-        cache_path,
-        cpu,
-        gpu,
-        args.variable,
-        steps,
-        args.max_times,
-    )
 
     field_cmap = build_pwo_colormap()
     difference_cmap = mpl.colors.ListedColormap(
@@ -552,7 +586,7 @@ def main() -> None:
     )
     draw_combined_hovmoller(
         outputs,
-        cpu.x,
+        x_m,
         comparison["time_minutes"],
         label,
         combined_path,
