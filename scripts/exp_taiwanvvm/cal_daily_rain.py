@@ -64,7 +64,7 @@ def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--case", choices=["original", "large", "all"], default="all")
     parser.add_argument("--model", choices=["VVM", "VVMex", "all"], default="all")
-    parser.add_argument("--output-dir", type=Path, default=SCRIPT_DIR / "data" / "daily_rain_cf")
+    parser.add_argument("--output-dir", type=Path, default=ROOT_DIR / "DATA" / "exp_taiwanvvm" / "daily_rain_cf")
     parser.add_argument(
         "--skip-days",
         type=int,

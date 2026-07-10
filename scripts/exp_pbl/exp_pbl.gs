@@ -5,6 +5,8 @@
 'set background 1'
 'c'
 
+'! mkdir -p ./fig'
+
 explist='grass urban evergreen'
 modellist='VVM VVMex'
 
@@ -12,9 +14,9 @@ iexp=1
 while(iexp<=3)
 explab=subwrd(explist, iexp)
 
-'sdfopen ./data/'explab'_VVMex.nc'
-'sdfopen ./data/'explab'_VVM.nc'
-'sdfopen ./data/'explab'_l2.nc'
+'sdfopen ../../DATA/exp_pbl/'explab'_VVMex.nc'
+'sdfopen ../../DATA/exp_pbl/'explab'_VVM.nc'
+'sdfopen ../../DATA/exp_pbl/'explab'_l2.nc'
 
 imo=1
 while(imo<=2)
@@ -36,6 +38,7 @@ say model' 'explab
 'set t 1 'nt
 'set grads off'
 'set timelab off'
+'on'
 'mul 1 1 1 1 -xint 1 -xwid 4.5 -ywid 4'
 'set vrange 0 8e-4'
 'd thbar_l2.3'

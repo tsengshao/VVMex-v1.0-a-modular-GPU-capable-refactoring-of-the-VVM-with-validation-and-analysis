@@ -26,9 +26,10 @@ from vvmtools.analyze import DataRetriever
 
 
 SCRIPT_DIR = Path(__file__).resolve().parent
+ROOT_DIR = SCRIPT_DIR.parent.parent
 DEFAULT_VVM_CASE = (SCRIPT_DIR / "../../VVM/case_rce_f1_aaron_rad").resolve()
 DEFAULT_VVMEX_CASE = (SCRIPT_DIR / "../../VVMex/rcemip_0623").resolve()
-DEFAULT_OUTPUT = SCRIPT_DIR / "water_path_timeseries.nc"
+DEFAULT_OUTPUT = ROOT_DIR / "DATA/exp_rcemip/water_path_timeseries.nc"
 
 VVM_PATTERN = re.compile(r"\.L\.Thermodynamic-(\d{6})\.nc$")
 VVMEX_PATTERN = re.compile(r"vvm_output_(\d{6})\.h5$")

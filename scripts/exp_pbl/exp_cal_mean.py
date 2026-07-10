@@ -16,9 +16,10 @@ import xarray as xr
 
 
 SCRIPT_DIR = Path(__file__).resolve().parent
+ROOT_DIR = SCRIPT_DIR.parent.parent
 DEFAULT_CPU_ROOT = (SCRIPT_DIR / "../../VVM").resolve()
 DEFAULT_GPU_ROOT = (SCRIPT_DIR / "../../VVMex").resolve()
-DEFAULT_OUTPUT_DIR = SCRIPT_DIR / "data"
+DEFAULT_OUTPUT_DIR = ROOT_DIR / "DATA/exp_pbl"
 LANDS = ("grass", "evergreen", "urban")
 MODELS = ("VVM", "VVMex")
 PROFILE_VARS = ("thbar", "qvbar", "qcbar", "qibar", "qrbar")

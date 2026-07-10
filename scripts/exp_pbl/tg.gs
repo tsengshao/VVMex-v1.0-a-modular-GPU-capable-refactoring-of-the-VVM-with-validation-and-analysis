@@ -4,6 +4,8 @@
 'set background 1'
 'c'
 
+'! mkdir -p ./fig'
+
 nt=571
 
 explist='grass urban evergreen'
@@ -17,7 +19,7 @@ model=subwrd(modellist, imo)
 
 say model' 'explab
 
-'sdfopen ./data/'explab'_'model'.nc'
+'sdfopen ../../DATA/exp_pbl/'explab'_'model'.nc'
 
 'c'
 

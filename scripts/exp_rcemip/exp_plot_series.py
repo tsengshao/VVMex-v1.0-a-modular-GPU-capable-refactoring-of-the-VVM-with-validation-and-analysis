@@ -19,7 +19,8 @@ from matplotlib.lines import Line2D
 
 
 SCRIPT_DIR = Path(__file__).resolve().parent
-DEFAULT_INPUT = SCRIPT_DIR / "water_path_timeseries.nc"
+ROOT_DIR = SCRIPT_DIR.parent.parent
+DEFAULT_INPUT = ROOT_DIR / "DATA/exp_rcemip/water_path_timeseries.nc"
 DEFAULT_OUTPUT = SCRIPT_DIR / "fig_water_path_timeseries.pdf"
 
 MODEL_NAMES = ("VVM", "VVMex")

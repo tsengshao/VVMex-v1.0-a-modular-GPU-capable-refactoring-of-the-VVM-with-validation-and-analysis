@@ -1,9 +1,9 @@
 #!/bin/bash
 
-vvmPath="/data3/C.shaoyu/VVM_Sharon/cpu/exp"
+vvmPath="/data3/C.shaoyu/VVM_Sharon/VVM/exp"
 
 outVvmPath="/work1/umbrella0c/VVM/DATA"
-outVvmPath="/data3/C.shaoyu/VVM_Sharon/cpu/"
+outVvmPath="/data3/C.shaoyu/VVM_Sharon/VVM/"
 
 typeList="C.Surface L.Dynamic L.Radiation L.Thermodynamic"
 expList="case_taiwanvvm_f1_Large_aaron"

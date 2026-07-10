@@ -7,9 +7,9 @@
 domain=2048
 
 if (domain=1024)
-'sdfopen ./data/daily_rain_cf/taiwanvvm_1024x1024_VVMex_VVM_daily_rain_skip0_days1_halfshift_rollx0_rolly0_cf.nc'
+'sdfopen ../../DATA/exp_taiwanvvm/daily_rain_cf/taiwanvvm_1024x1024_VVMex_VVM_daily_rain_skip0_days1_halfshift_rollx0_rolly0_cf.nc'
 else
-'sdfopen ./data/daily_rain_cf/taiwanvvmlarge_2048x2048_VVMex_VVM_daily_rain_skip0_days1_halfshift_rollx512_rolly512_cf.nc'
+'sdfopen ../../DATA/exp_taiwanvvm/daily_rain_cf/taiwanvvmlarge_2048x2048_VVMex_VVM_daily_rain_skip0_days1_halfshift_rollx512_rolly512_cf.nc'
 endif
 
 'set xlopts 1 5 0.2'
@@ -96,4 +96,3 @@ endif
 
 i=i+1
 endwhile
-

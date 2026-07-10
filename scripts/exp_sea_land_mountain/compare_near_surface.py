@@ -19,6 +19,7 @@ from vvm_readers import CPUReader, GPUReader
 
 
 SCRIPT_DIR = Path(__file__).resolve().parent
+ROOT_DIR = SCRIPT_DIR.parent.parent
 DEFAULT_CASE = "grass"
 DEFAULT_CASE_PATHS = {
     "grass": {
@@ -30,7 +31,7 @@ DEFAULT_CASE_PATHS = {
         "gpu": SCRIPT_DIR / "../../VVMex/sea_urban_mountain_good_luck_2",
     },
 }
-DEFAULT_CACHE_DIR = SCRIPT_DIR / "nc"
+DEFAULT_CACHE_DIR = ROOT_DIR / "DATA/exp_sea_land_mountain"
 
 FIELD_CLEVS = np.arange(-5.0, 5.1, 0.5)
 DIFFERENCE_CLEVS = np.arange(0, 1.1, 0.1)
