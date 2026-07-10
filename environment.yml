@@ -1,0 +1,17 @@
+name: vvm-vvmex-analysis
+channels:
+  - conda-forge
+dependencies:
+  # The scripts use PEP 604 union type annotations (for example, Path | None).
+  - python=3.11
+  - h5py
+  - matplotlib
+  - netcdf4
+  - numpy
+  - pandas
+  - pypdf
+  - xarray
+  # VVMTools is distributed on PyPI rather than conda-forge.
+  - pip
+  - pip:
+      - vvmtools==1.1.0
